@@ -7,86 +7,204 @@
   <title>Weather App</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #87CEEB, #1E90FF);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background-color: #87CEEB;
-      margin: 0;
+      transition: background 0.5s ease;
     }
 
     .container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      padding: 30px;
       text-align: center;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    h2 {
+      color: #2C3E50;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 28px;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-box {
+      display: flex;
+      margin-bottom: 25px;
     }
 
     input {
-      padding: 10px;
-      margin: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 50px 0 0 50px;
+      font-size: 16px;
+      background: #f1f1f1;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+      outline: none;
     }
 
     button {
-      padding: 10px 15px;
-      border: none;
-      background-color: #008CBA;
+      background: #3498DB;
       color: white;
-      border-radius: 5px;
+      border: none;
+      border-radius: 0 50px 50px 0;
+      padding: 0 25px;
       cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #2980B9;
     }
 
     #weather-result {
       margin-top: 20px;
-      font-size: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      font-weight: normal;
+      transition: all 0.3s ease;
+    }
+
+    .weather-info {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .location-name {
+      font-size: 26px;
+      color: #2C3E50;
+      margin-bottom: 10px;
+    }
+
+    .temperature {
+      font-size: 48px;
       font-weight: bold;
+      color: #E74C3C;
+      margin: 10px 0;
+    }
+
+    .date-time {
+      display: flex;
+      justify-content: space-around;
+      margin: 15px 0;
+      color: #7F8C8D;
+      font-size: 14px;
+    }
+
+    .weather-icon {
+      font-size: 60px;
+      margin: 15px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 95%;
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .temperature {
+        font-size: 36px;
+      }
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h2>Weather App</h2>
-    <input type="text" id="location" placeholder="Enter your location">
-    <button onclick="getWeather()">Get Weather</button>
-    <div id="weather-result"></div>
+    <h2>Weather Forecast</h2>
+    <div class="search-box">
+      <input type="text" id="location" placeholder="Enter your location">
+      <button onclick="getWeather()">Search</button>
+    </div>
+
+    <div id="weather-result">Enter a location to see the weather forecast</div>
   </div>
 
   <script>
     async function getWeather() {
       const location = document.getElementById('location').value;
+      const resultDiv = document.getElementById('weather-result');
+
       if (!location) {
-        alert('Please enter a location');
+        resultDiv.innerHTML = 'Please enter a location';
         return;
       }
 
+      resultDiv.innerHTML = 'Loading...';
+
       const apiKey = 'c3881d270c26430a85e134754250203';
-      const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}&aqi=yes`;
+      const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}&aqi=yes`;
 
       try {
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.error) {
-          document.getElementById('weather-result').innerHTML = `Error: ${data.error.message}`;
+          resultDiv.innerHTML = `Error: ${data.error.message}`;
         } else {
           const dateTime = new Date(data.location.localtime);
           const day = dateTime.toLocaleDateString('en-US', { weekday: 'long' });
           const date = dateTime.toLocaleDateString();
-          const time = dateTime.toLocaleTimeString();
+          const time = dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-          document.getElementById('weather-result').innerHTML =
-            `Temperature in ${data.location.name}: ${data.current.temp_c}°C<br>
-                        Day: ${day}<br>
-                        Date: ${date}<br>
-                        Time: ${time}`;
+          // Change background gradient based on temperature
+          let tempC = data.current.temp_c;
+          let bgGradient = '';
+
+          if (tempC > 30) {
+            // Hot weather
+            bgGradient = 'linear-gradient(to bottom, #FF9966, #FF5E62)';
+          } else if (tempC > 20) {
+            // Warm weather
+            bgGradient = 'linear-gradient(to bottom, #FFEB3B, #FFA726)';
+          } else if (tempC > 10) {
+            // Mild weather
+            bgGradient = 'linear-gradient(to bottom, #87CEEB, #3498DB)';
+          } else if (tempC > 0) {
+            // Cool weather
+            bgGradient = 'linear-gradient(to bottom, #81D4FA, #4FC3F7)';
+          } else {
+            // Cold weather
+            bgGradient = 'linear-gradient(to bottom, #B2EBF2, #26C6DA)';
+          }
+
+          document.body.style.background = bgGradient;
+
+          resultDiv.innerHTML = `
+                        <div class="location-name">${data.location.name}, ${data.location.country}</div>
+                        <div class="temperature">${tempC}°C</div>
+                        <div class="condition">${data.current.condition.text}</div>
+                        <div class="date-time">
+                            <span>${day}</span>
+                            <span>${date}</span>
+                            <span>${time}</span>
+                        </div>
+                        <div class="additional-info">
+                            <p>Humidity: ${data.current.humidity}%</p>
+                            <p>Wind: ${data.current.wind_kph} km/h</p>
+                        </div>
+                    `;
         }
       } catch (error) {
-        document.getElementById('weather-result').innerHTML = 'Failed to fetch weather data';
+        resultDiv.innerHTML = 'Failed to fetch weather data. Please try again.';
       }
     }
   </script>
