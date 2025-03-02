@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #87CEEB;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input {
+      padding: 10px;
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #008CBA;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #weather-result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Weather App</h2>
+    <input type="text" id="location" placeholder="Enter your location">
+    <button onclick="getWeather()">Get Weather</button>
+    <div id="weather-result"></div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const location = document.getElementById('location').value;
+      if (!location) {
+        alert('Please enter a location');
+        return;
+      }
+
+      const apiKey = 'c3881d270c26430a85e134754250203';
+      const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}&aqi=yes`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+          document.getElementById('weather-result').innerHTML = `Error: ${data.error.message}`;
+        } else {
+          const dateTime = new Date(data.location.localtime);
+          const day = dateTime.toLocaleDateString('en-US', { weekday: 'long' });
+          const date = dateTime.toLocaleDateString();
+          const time = dateTime.toLocaleTimeString();
+
+          document.getElementById('weather-result').innerHTML =
+            `Temperature in ${data.location.name}: ${data.current.temp_c}°C<br>
+                        Day: ${day}<br>
+                        Date: ${date}<br>
+                        Time: ${time}`;
+        }
+      } catch (error) {
+        document.getElementById('weather-result').innerHTML = 'Failed to fetch weather data';
+      }
+    }
+  </script>
+</body>
+
+</html>
